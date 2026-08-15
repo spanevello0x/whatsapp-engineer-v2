@@ -9,7 +9,7 @@ Conduzir qualquer instalador, em OpenClaw, Hermes, Codex ou outro runtime, ate u
 1. explicar que o pareamento pode baixar 100% das conversas acessiveis pelo WhatsApp Web;
 2. exigir confirmacao de entendimento antes do QR real;
 3. registrar telefones, donos, finalidade, escopo, consentimento e cadencia;
-4. preparar o QR como imagem pronta para envio pelo gateway escolhido;
+4. gerar o QR como imagem e entregar na conversa/canal onde a implementacao esta acontecendo, quando o gateway permitir;
 5. sugerir rotina de monitoramento, cron e usabilidade;
 6. salvar tudo fora do Git em `~/.openclaw/state/whatsapp-engineer/`.
 
@@ -68,7 +68,9 @@ Esses arquivos sao privados do ambiente. Nao versionar.
 
 ## Gateway do QR
 
-O wizard nao assume um provedor unico. Ele prepara uma imagem e imprime uma das rotas:
+O wizard nao assume um provedor unico. A rota preferida em OpenClaw e `openclaw-message`: o instalador informa `gateway.channel` e `gateway.target`, ou o ambiente fornece `OPENCLAW_CHANNEL` e `OPENCLAW_TARGET`, e o wizard envia a imagem do QR direto para essa conversa/canal.
+
+Se o destino nao estiver explicito, a entrega automatica e pulada por seguranca. Nesse caso o wizard imprime uma das rotas de fallback:
 
 - `MEDIA:/path/to/qr-handoff.png` para agentes que entendem entrega por midia;
 - caminho do arquivo para anexo manual;

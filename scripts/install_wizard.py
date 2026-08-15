@@ -99,7 +99,7 @@ def collect_interactive() -> dict[str, Any]:
     agent_system = ask_choice("Onde o agente vai rodar", ["openclaw", "hermes", "codex", "other"], "openclaw")
     gateway_channel = ask_choice("Por qual gateway o QR deve ser entregue", ["telegram", "whatsapp", "manual"], "manual")
     gateway_target = ask("ID/chat/destino do gateway, ou vazio se manual", "")
-    qr_delivery = ask_choice("Como entregar o QR", ["media-line", "copy-path", "custom-command"], "media-line")
+    qr_delivery = ask_choice("Como entregar o QR", ["openclaw-message", "media-line", "copy-path", "custom-command"], "openclaw-message")
     custom_command = ""
     if qr_delivery == "custom-command":
         custom_command = ask("Comando custom com {path} e {message}", "")
@@ -156,7 +156,7 @@ def demo_answers() -> dict[str, Any]:
         "gateway": {
             "channel": "telegram",
             "target": "TELEGRAM_CHAT_OR_USER_ID",
-            "qr_delivery": "media-line",
+            "qr_delivery": "openclaw-message",
             "custom_command": "",
         },
         "phones": [
@@ -200,13 +200,16 @@ def normalize_answers(raw: dict[str, Any]) -> dict[str, Any]:
     if not normalized:
         normalized = demo_answers()["phones"]
     gateway = raw.get("gateway") or {}
+    qr_delivery = str(gateway.get("qr_delivery") or "openclaw-message")
+    if qr_delivery not in {"openclaw-message", "media-line", "copy-path", "custom-command"}:
+        qr_delivery = "openclaw-message"
     return {
         "operator": str(raw.get("operator") or ""),
         "agent_system": str(raw.get("agent_system") or "openclaw"),
         "gateway": {
             "channel": str(gateway.get("channel") or "manual"),
             "target": str(gateway.get("target") or ""),
-            "qr_delivery": str(gateway.get("qr_delivery") or "media-line"),
+            "qr_delivery": qr_delivery,
             "custom_command": str(gateway.get("custom_command") or ""),
         },
         "phones": normalized,
@@ -296,7 +299,7 @@ def build_plan(answers: dict[str, Any], *, simulate: bool) -> dict[str, Any]:
         "next_steps": [
             "instalar dependencias com npm install",
             "rodar python3 workspace/run.py install-wizard --generate-qr quando o operador estiver pronto",
-            "entregar o QR imediatamente pelo gateway escolhido",
+            "entregar o QR imediatamente na conversa/canal de implementacao pelo gateway escolhido",
             "monitorar status ate open/history",
             "validar com status-v2 e uma busca limitada antes de liberar digest automatico",
         ],
@@ -334,11 +337,86 @@ def copy_qr_to_handoff(source: Path, simulate: bool) -> Path:
     return QR_HANDOFF
 
 
-def print_qr_delivery(plan: dict[str, Any], qr_path: Path) -> None:
+def env_first(*names: str) -> str:
+    for name in names:
+        value = os.environ.get(name)
+        if value:
+            return value
+    return ""
+
+
+def resolve_gateway_destination(gateway: dict[str, Any]) -> tuple[str, str]:
+    channel = str(gateway.get("channel") or "")
+    target = str(gateway.get("target") or "")
+    if not channel or channel == "manual":
+        channel = env_first("OPENCLAW_CHANNEL", "OPENCLAW_MESSAGE_CHANNEL", "CHANNEL") or channel
+    if not target:
+        target = env_first("OPENCLAW_TARGET", "OPENCLAW_MESSAGE_TARGET", "OPENCLAW_CHAT_ID", "CHAT_ID")
+    return channel, target
+
+
+def deliver_qr_with_openclaw(plan: dict[str, Any], qr_path: Path, *, simulate: bool) -> dict[str, Any]:
+    gateway = plan["gateway"]
+    channel, target = resolve_gateway_destination(gateway)
+    message = "QR valido agora. Escaneie pelo WhatsApp > Aparelhos conectados > Conectar aparelho."
+    if not channel or channel == "manual" or not target:
+        return {
+            "ok": False,
+            "skipped": True,
+            "reason": "missing_channel_or_target",
+            "message": "Configure gateway.channel e gateway.target, ou OPENCLAW_CHANNEL/OPENCLAW_TARGET, para entrega automatica.",
+        }
+
+    cmd = [
+        "openclaw",
+        "message",
+        "send",
+        "--channel",
+        channel,
+        "--target",
+        target,
+        "--message",
+        message,
+        "--media",
+        str(qr_path),
+        "--json",
+    ]
+    if simulate:
+        cmd.append("--dry-run")
+    try:
+        proc = subprocess.run(cmd, text=True, capture_output=True, check=False)
+    except FileNotFoundError:
+        return {
+            "ok": False,
+            "skipped": True,
+            "reason": "openclaw_cli_not_found",
+            "message": "Comando openclaw nao encontrado; use media-line, copy-path ou custom-command neste runtime.",
+        }
+    return {
+        "ok": proc.returncode == 0,
+        "returncode": proc.returncode,
+        "channel": channel,
+        "target": target,
+        "stdout": proc.stdout[-4000:],
+        "stderr": proc.stderr[-4000:],
+        "simulated": simulate,
+    }
+
+
+def print_qr_delivery(plan: dict[str, Any], qr_path: Path, *, simulate: bool) -> dict[str, Any] | None:
     gateway = plan["gateway"]
     message = "Escaneie este QR pelo WhatsApp > Aparelhos conectados > Conectar aparelho."
     print("\nQR pronto para entrega")
     print(f"Arquivo: {qr_path}")
+    if gateway["qr_delivery"] == "openclaw-message":
+        result = deliver_qr_with_openclaw(plan, qr_path, simulate=simulate)
+        print("\nEntrega automatica via OpenClaw:")
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        if not result.get("ok"):
+            print("\nFallback para agentes/canais que entendem entrega por midia:")
+            print(f"MEDIA:{qr_path}")
+            print(message)
+        return result
     if gateway["qr_delivery"] == "media-line":
         print("\nEnvie pelo gateway/canal atual usando:")
         print(f"MEDIA:{qr_path}")
@@ -352,6 +430,7 @@ def print_qr_delivery(plan: dict[str, Any], qr_path: Path) -> None:
         print(cmd)
     else:
         print("\nAnexe manualmente o PNG no gateway escolhido.")
+    return None
 
 
 def start_connect(wait_seconds: int) -> dict[str, Any]:
@@ -416,12 +495,15 @@ def main() -> int:
             return 2
         if args.simulate:
             qr_path = copy_qr_to_handoff(BAILEYS_DIR / "qr.png", simulate=True)
-            print_qr_delivery(plan, qr_path)
+            delivery_result = print_qr_delivery(plan, qr_path, simulate=True)
         else:
             result = start_connect(args.wait_qr_seconds)
             print(json.dumps({"event": "connect-started", "result": result}, ensure_ascii=False, indent=2))
             qr_path = copy_qr_to_handoff(BAILEYS_DIR / "qr.png", simulate=False)
-            print_qr_delivery(plan, qr_path)
+            delivery_result = print_qr_delivery(plan, qr_path, simulate=False)
+        if delivery_result is not None:
+            plan["qr_delivery_result"] = delivery_result
+            write_private_json(INSTALL_PLAN, plan)
 
     if args.monitor and not args.simulate:
         result = monitor_status(args.monitor_timeout_seconds)

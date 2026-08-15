@@ -168,7 +168,7 @@ O comando `install-wizard` conduz uma instalacao segura para OpenClaw, Hermes, C
 - registra telefones, donos, finalidade, escopo, consentimento e cadencia;
 - gera um plano privado em `~/.openclaw/state/whatsapp-engineer/install/install-plan.json`;
 - atualiza `~/.openclaw/state/whatsapp-engineer/phone_registry.json`;
-- prepara o QR como PNG para entrega no gateway escolhido;
+- gera o QR como PNG e tenta entregar na conversa/canal de implementacao pelo gateway escolhido;
 - sugere crons e modos de uso conforme a cadencia escolhida.
 
 Fluxo recomendado:
@@ -180,6 +180,8 @@ python3 workspace/run.py status-v2
 ```
 
 Use `simulate-install` para validar a experiencia sem conectar um telefone real.
+
+Para entrega automatica no OpenClaw, informe `gateway.channel` e `gateway.target` no JSON de respostas, ou rode em um ambiente que exponha `OPENCLAW_CHANNEL` e `OPENCLAW_TARGET`. Sem destino explicito, o wizard imprime fallback `MEDIA:/path/to/qr-handoff.png` para evitar mandar QR sensivel no lugar errado.
 
 ## Licença
 

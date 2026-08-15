@@ -5,7 +5,7 @@
 - Adiciona `install-wizard`, um wizard publico para instalacao segura em OpenClaw/Hermes/Codex/outros runtimes.
 - Wizard exibe aviso sobre download potencial de 100% das conversas, guardrails contra vazamento, risco de sincronizacao continua e consentimento do dono do telefone.
 - Wizard registra telefones, donos, finalidade, escopo, consentimento e cadencia em `phone_registry.json`.
-- Wizard prepara QR como PNG de handoff para gateway, suporta simulacao sem WhatsApp real e sugere crons/usabilidade por cadencia.
+- Wizard gera QR como PNG e tenta entregar a imagem na conversa/canal de implementacao via OpenClaw quando o destino esta explicito; mantem fallback `MEDIA:`/manual/custom.
 - Adiciona `simulate-install` para validar a experiencia sem conectar um telefone real.
 - Documenta o fluxo em `references/install-wizard.md`.
 
