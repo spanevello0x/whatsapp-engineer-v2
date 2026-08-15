@@ -38,6 +38,18 @@ Configuração guiada:
 python3 scripts/configure.py
 ```
 
+Wizard publico de instalacao, privacidade, QR e registro de telefones:
+
+```bash
+python3 workspace/run.py install-wizard
+```
+
+Simulacao sem conectar WhatsApp real:
+
+```bash
+python3 workspace/run.py simulate-install --print-plan
+```
+
 Pareamento por QR:
 
 ```bash
@@ -90,6 +102,10 @@ Por padrão, estado local fica em:
 
 ## Segurança operacional
 
+- O pareamento pode baixar 100% das conversas acessiveis pelo WhatsApp Web para o ambiente local.
+- O agente/sistema que consulta o historico precisa ter guardrails para nao vazar conversas a terceiros, grupos publicos ou canais errados.
+- Antes de gerar QR, documente quem e dono do telefone, finalidade do monitoramento, escopo e consentimento.
+- Sincronia 100% continua pode sobrecarregar o ambiente. Prefira rotina horaria, diaria ou horario comercial quando tempo real nao for necessario.
 - Um número = uma engine dona por vez.
 - Não rode junto com outro Baileys/gateway usando o mesmo número.
 - Escrita/admin exige `--execute` e flags explícitas.
@@ -143,6 +159,27 @@ workspace/run.py                 # wrapper operacional principal
 workspace/*.mjs                  # worker Baileys e helpers Node
 references/                      # docs de configuração e operação
 ```
+
+## Wizard publico
+
+O comando `install-wizard` conduz uma instalacao segura para OpenClaw, Hermes, Codex ou outro runtime:
+
+- exibe aviso de privacidade antes do QR;
+- registra telefones, donos, finalidade, escopo, consentimento e cadencia;
+- gera um plano privado em `~/.openclaw/state/whatsapp-engineer/install/install-plan.json`;
+- atualiza `~/.openclaw/state/whatsapp-engineer/phone_registry.json`;
+- prepara o QR como PNG para entrega no gateway escolhido;
+- sugere crons e modos de uso conforme a cadencia escolhida.
+
+Fluxo recomendado:
+
+```bash
+python3 workspace/run.py install-wizard
+python3 workspace/run.py install-wizard --generate-qr --monitor
+python3 workspace/run.py status-v2
+```
+
+Use `simulate-install` para validar a experiencia sem conectar um telefone real.
 
 ## Licença
 

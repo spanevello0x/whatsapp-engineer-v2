@@ -34,6 +34,18 @@ def main() -> int:
 
     p = sub.add_parser("first-run", help="Wizard inicial guiado da skill")
 
+    p = sub.add_parser("install-wizard", help="Wizard publico de instalacao, privacidade, QR e registro de telefones")
+    p.add_argument("--answers")
+    p.add_argument("--simulate", action="store_true")
+    p.add_argument("--generate-qr", action="store_true")
+    p.add_argument("--monitor", action="store_true")
+    p.add_argument("--print-plan", action="store_true")
+    p.add_argument("--wait-qr-seconds", type=int, default=20)
+    p.add_argument("--monitor-timeout-seconds", type=int, default=240)
+
+    p = sub.add_parser("simulate-install", help="Simula o wizard publico sem conectar WhatsApp real")
+    p.add_argument("--print-plan", action="store_true")
+
     p = sub.add_parser("settings", help="Mostra ou inicializa settings.json da skill")
     p.add_argument("--init", action="store_true")
     p.add_argument("--print", action="store_true", default=True)
@@ -162,6 +174,28 @@ def main() -> int:
 
     if args.command == "first-run":
         return run_script("first_run.py", [])
+
+    if args.command == "install-wizard":
+        out = []
+        if args.answers:
+            out.extend(["--answers", args.answers])
+        if args.simulate:
+            out.append("--simulate")
+        if args.generate_qr:
+            out.append("--generate-qr")
+        if args.monitor:
+            out.append("--monitor")
+        if args.print_plan:
+            out.append("--print-plan")
+        out.extend(["--wait-qr-seconds", str(args.wait_qr_seconds)])
+        out.extend(["--monitor-timeout-seconds", str(args.monitor_timeout_seconds)])
+        return run_script("install_wizard.py", out)
+
+    if args.command == "simulate-install":
+        out = ["--simulate", "--monitor"]
+        if args.print_plan:
+            out.append("--print-plan")
+        return run_script("install_wizard.py", out)
 
     if args.command == "settings":
         out = []
