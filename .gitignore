@@ -19,3 +19,8 @@ node_modules/
 state/
 qr/
 sessions/
+
+dist/
+*.zip
+*.tgz
+.DS_Store

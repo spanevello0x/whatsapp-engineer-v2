@@ -1,6 +1,6 @@
 {
   "name": "whatsapp-engineer",
-  "version": "1.14.4",
+  "version": "2.0.0",
   "private": false,
   "type": "module",
   "description": "OpenClaw skill for local WhatsApp monitoring, profile history search, media/audio transcription and digest delivery.",
@@ -14,12 +14,15 @@
     "wavefile": "^11.0.0"
   },
   "license": "MIT",
-  "homepage": "https://github.com/spanevello0x/whatsapp-engineer",
+  "homepage": "https://github.com/spanevello0x/whatsapp-engineer-v2",
   "repository": {
     "type": "git",
-    "url": "https://github.com/spanevello0x/whatsapp-engineer.git"
+    "url": "https://github.com/spanevello0x/whatsapp-engineer-v2.git"
   },
   "bugs": {
-    "url": "https://github.com/spanevello0x/whatsapp-engineer/issues"
+    "url": "https://github.com/spanevello0x/whatsapp-engineer-v2/issues"
+  },
+  "engines": {
+    "node": ">=22.13.0"
   }
 }

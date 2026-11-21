@@ -1,188 +1,51 @@
-# WhatsApp Engineer
+# WhatsApp Engineer V2
 
-Skill avançada para OpenClaw que ajuda terceiros a monitorar WhatsApp localmente com perfis separados, histórico em SQLite, MCP `whatsapp-profiles`, download/transcrição de mídia e entrega de resumos operacionais.
+Instale o acompanhamento de vários números de WhatsApp por uma conversa guiada em português. O agente pede número, nome de quem usa e setor, explica os horários de sincronização, apresenta os códigos QR e configura a rotina.
 
-> Escopo: leitura, busca, resumo, transcrição e entrega controlada. Escrita/admin em WhatsApp é modo avançado, bloqueado por padrão e exige confirmação explícita.
-
-## O que faz
-
-- Pareia um número WhatsApp por QR em ambiente controlado.
-- Mantém engine Baileys própria para leitura/sincronia local.
-- Guarda histórico em SQLite local fora do Git.
-- Expõe busca histórica via MCP `whatsapp-profiles`.
-- Lista mensagens, links, documentos, imagens, vídeos e áudios.
-- Transcreve áudios localmente quando mídia baixada está disponível.
-- Gera resumos operacionais por período/perfil/chat.
-- Entrega resultado em destino configurado: Telegram, Discord, manual ou adaptador próprio.
-
-## Para quem é
-
-- Times que precisam acompanhar WhatsApp de suporte, vendas ou operação.
-- Agentes OpenClaw que precisam consultar histórico local sem expor bancos na nuvem.
-- Desenvolvedores que querem uma base para criar monitoramento privado por perfil.
-
-Não é skill para usuário leigo. Use em VPS/container ou máquina dedicada, com consentimento de quem pareia o número.
-
-## Instalação rápida
-
-```bash
-git clone https://github.com/spanevello0x/whatsapp-engineer.git ~/.openclaw/skills/whatsapp-engineer
-cd ~/.openclaw/skills/whatsapp-engineer
-npm install
-python3 workspace/run.py status
-```
-
-Configuração guiada:
-
-```bash
-python3 scripts/configure.py
-```
-
-Wizard publico de instalacao, privacidade, QR e registro de telefones:
-
-```bash
-python3 workspace/run.py install-wizard
-```
-
-Simulacao sem conectar WhatsApp real:
-
-```bash
-python3 workspace/run.py simulate-install --print-plan
-```
-
-Pareamento por QR:
-
-```bash
-python3 workspace/run.py connect --project Equipe --name Principal --number PHONE_E164
-```
-
-Depois do scan, valide:
-
-```bash
-python3 workspace/run.py status-v2
-python3 workspace/run.py history-search-v2 --limit 10
-```
-
-## MCP embutido
-
-O servidor MCP fica em:
+## Copie e cole no seu agente
 
 ```text
-embedded_mcp/whatsapp_profiles/
+Instale o WhatsApp Engineer V2 usando o repositório abaixo e me guie em português até deixar a configuração pronta.
+
+https://github.com/spanevello0x/whatsapp-engineer-v2
+
+Leia INICIAR.md e SKILL.md e siga o roteiro. Execute a preparação técnica com suas ferramentas. Me peça número com DDD, nome de quem usa e setor de cada telefone. Explique os horários recomendados de sincronização e que as conversas recentes podem aguardar a próxima rodada. Antes de gerar cada código QR, espere eu confirmar que o celular está pronto. Acompanhe a primeira sincronização, ative os horários e informe o resultado de cada telefone e a próxima execução.
 ```
 
-Ele lê `profiles.json` e os bancos `messages.db` dos perfis. Dados reais não ficam no repositório.
+Você também pode entregar o [ZIP da versão 2.0.0](https://github.com/spanevello0x/whatsapp-engineer-v2/releases/download/v2.0.0/whatsapp-engineer-v2-2.0.0.zip) ao agente e enviar o mesmo pedido, indicando o arquivo anexado. O agente precisa conseguir ler e extrair o arquivo.
 
-Registrar MCP:
+## Durante a configuração
+
+Tenha os celulares disponíveis e o WhatsApp aberto. O agente vai pedir, para cada telefone, o número com DDD, o nome de quem utiliza e o setor. Por exemplo, telefone da Ana Souza, do setor de Vendas. Isso ajuda em análises posteriores por pessoa ou equipe.
+
+A recomendação é sincronizar a cada duas horas, todos os dias, das 06h às 22h, no horário de Brasília. Você pode escolher outros horários. As análises usam as conversas já copiadas. Se a última sincronização foi às 08h, mensagens recebidas depois podem aparecer só a partir da rodada das 10h. Sincronizar continuamente pode sobrecarregar o servidor.
+
+A primeira cópia começa após conectar cada telefone. O agente acompanha o progresso, preserva o que já chegou e informa quando uma continuação for necessária.
+
+## Onde instalar
+
+O serviço de sincronização funciona em uma VPS Linux com systemd ou em um Mac que permaneça ligado e com usuário conectado nos horários escolhidos. Hermes e OpenClaw na VPS podem usar a própria máquina. Codex e Claude Code podem preparar uma instalação local ou por SSH em uma VPS. Uma conversa na nuvem precisa ter acesso ao ambiente onde o serviço ficará rodando.
+
+O pacote inclui o mesmo roteiro para esses agentes. O instalador adapta o diretório da skill. A entrega de QR e o registro opcional do MCP usam as capacidades disponíveis no ambiente. O agente identifica essas condições durante a configuração. Consulte [os detalhes dos ambientes](references/ambientes-v2.md).
+
+## Para quem instala manualmente
+
+Clone ou extraia o pacote completo, leia `INICIAR.md` e escolha o agente.
 
 ```bash
-python3 workspace/run.py setup-mcp \
-  --profiles-config "$HOME/Documents/WhatsApp MCP Profiles/profiles.json" \
-  --install \
-  --register
+git clone https://github.com/spanevello0x/whatsapp-engineer-v2.git
+cd whatsapp-engineer-v2
+python3 install.py --agent hermes
 ```
 
-## Onde ficam dados sensíveis
+O comando imprime a pasta estável da instalação. Peça ao agente para ler `SKILL.md` nessa pasta e seguir o roteiro. O agente executa preparação, cadastro, conexão, sincronização e agendamento pelos [comandos de operação](references/operacao-v2.md).
 
-Nunca versionar:
+## Versão e origem
 
-- QR codes;
-- sessões WhatsApp;
-- `messages.db`, `whatsapp.db` ou qualquer SQLite real;
-- mídias baixadas;
-- logs;
-- tokens de Telegram/Discord/OpenClaw;
-- exports de contatos ou conversas.
+A V2 usa a engine Baileys e os buscadores da base pública [WhatsApp Engineer](https://github.com/spanevello0x/whatsapp-engineer), commit `b7df832e7c3ad6682ffef3105bf40d6bb3941830`. Ela acrescenta instalação guiada e a coordenação de telefones e ciclos inspirada na operação do Iago. Cada telefone mantém autenticação, banco e mídia separados.
 
-Por padrão, estado local fica em:
+O pacote foi conferido quanto a estrutura, sintaxe, cadastro fictício e geração dos agendamentos. O QR e a captura são verificados durante a instalação com o telefone do usuário. O histórico disponível depende do que o WhatsApp fornece. A versão 2.0.0 preserva os arquivos da engine original.
 
-```text
-~/.openclaw/state/whatsapp-engineer/
-```
+Os dados ficam em `~/.local/share/whatsapp-engineer`, fora do repositório. Banco, mídia, QR e autenticação são privados. A engine de captura deve ter sua própria sessão por telefone. O uso das conversas segue a autorização dos responsáveis e as permissões do agente que faz as consultas.
 
-## Segurança operacional
-
-- O pareamento pode baixar 100% das conversas acessiveis pelo WhatsApp Web para o ambiente local.
-- O agente/sistema que consulta o historico precisa ter guardrails para nao vazar conversas a terceiros, grupos publicos ou canais errados.
-- Antes de gerar QR, documente quem e dono do telefone, finalidade do monitoramento, escopo e consentimento.
-- Sincronia 100% continua pode sobrecarregar o ambiente. Prefira rotina horaria, diaria ou horario comercial quando tempo real nao for necessario.
-- Um número = uma engine dona por vez.
-- Não rode junto com outro Baileys/gateway usando o mesmo número.
-- Escrita/admin exige `--execute` e flags explícitas.
-- Confirme destino antes do primeiro envio real.
-- Use variáveis de ambiente para tokens; a skill salva só o nome da variável.
-- Respeite consentimento, privacidade e legislação aplicável.
-
-## Exemplo de config
-
-```json
-{
-  "version": 1,
-  "agent": { "name": "agent" },
-  "source": {
-    "mcp": "whatsapp-profiles",
-    "profiles": ["vendas-principal"],
-    "chats": [],
-    "default_period": "last_24h"
-  },
-  "digest": {
-    "include_links": true,
-    "include_audio": true,
-    "max_messages": 120,
-    "format": "operational"
-  },
-  "destinations": {
-    "primary": {
-      "type": "telegram",
-      "target_kind": "topic",
-      "chat_id": "-1001234567890",
-      "message_thread_id": 123,
-      "token_env": "TELEGRAM_BOT_TOKEN",
-      "parse_mode": "HTML"
-    }
-  },
-  "safety": {
-    "redact_phone_numbers": true,
-    "require_confirmation_for_whatsapp_send": true,
-    "confirm_first_delivery": true,
-    "never_store_tokens": true
-  }
-}
-```
-
-## Estrutura
-
-```text
-embedded_mcp/whatsapp_profiles/  # MCP local para consultar perfis SQLite
-scripts/                         # setup, QR, busca, transcrição, entrega
-workspace/run.py                 # wrapper operacional principal
-workspace/*.mjs                  # worker Baileys e helpers Node
-references/                      # docs de configuração e operação
-```
-
-## Wizard publico
-
-O comando `install-wizard` conduz uma instalacao segura para OpenClaw, Hermes, Codex ou outro runtime:
-
-- exibe aviso de privacidade antes do QR;
-- registra telefones, donos, finalidade, escopo, consentimento e cadencia;
-- gera um plano privado em `~/.openclaw/state/whatsapp-engineer/install/install-plan.json`;
-- atualiza `~/.openclaw/state/whatsapp-engineer/phone_registry.json`;
-- gera o QR como PNG e tenta entregar na conversa/canal de implementacao pelo gateway escolhido;
-- sugere crons e modos de uso conforme a cadencia escolhida.
-
-Fluxo recomendado:
-
-```bash
-python3 workspace/run.py install-wizard
-python3 workspace/run.py install-wizard --generate-qr --monitor
-python3 workspace/run.py status-v2
-```
-
-Use `simulate-install` para validar a experiencia sem conectar um telefone real.
-
-Para entrega automatica no OpenClaw, informe `gateway.channel` e `gateway.target` no JSON de respostas, ou rode em um ambiente que exponha `OPENCLAW_CHANNEL` e `OPENCLAW_TARGET`. Sem destino explicito, o wizard imprime fallback `MEDIA:/path/to/qr-handoff.png` para evitar mandar QR sensivel no lugar errado.
-
-## Licença
-
-MIT. Use como base, adapte com cuidado e nunca publique dados pessoais.
+Licença MIT, com a atribuição da base preservada em `LICENSE`.

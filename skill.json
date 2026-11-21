@@ -1,12 +1,11 @@
 {
   "name": "whatsapp-engineer",
-  "version": "1.14.4",
-  "description": "Orquestra monitoramento local de WhatsApp com Baileys, SQLite, MCP whatsapp-profiles, transcrição de áudio e entrega de resumos.",
+  "version": "2.0.0",
+  "description": "Instalação guiada em português, cadastro por pessoa e setor e sincronização de vários WhatsApps em horários definidos.",
   "author": "OpenClaw Community",
   "license": "MIT",
-  "homepage": "https://github.com/spanevello0x/whatsapp-engineer",
+  "homepage": "https://github.com/spanevello0x/whatsapp-engineer-v2",
   "min_openclaw_version": "2026.4.0",
-  "runtime": "openclaw",
   "entry": ".",
   "permissions": {
     "allow": [

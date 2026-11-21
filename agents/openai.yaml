@@ -1,13 +1,6 @@
 interface:
-  display_name: "WhatsApp Engineer"
-  short_description: "Resume WhatsApp to chosen targets."
-  default_prompt: "Use $whatsapp-engineer at /home/openclaw/.openclaw/workspace/skills/whatsapp-engineer to configure OpenClaw agent, summarize WhatsApp messages and audio, and deliver the digest to my chosen target."
-
-dependencies:
-  tools:
-    - type: "mcp"
-      value: "whatsapp-profiles"
-      description: "Reads local WhatsApp profile databases and downloads media through whatsapp-mcp-local-kit."
-
+  display_name: "WhatsApp Engineer V2"
+  short_description: "Instala e configura seus WhatsApps com orientação em português."
+  default_prompt: "Use $whatsapp-engineer para instalar e configurar o acompanhamento dos meus WhatsApps, me guiando em português."
 policy:
   allow_implicit_invocation: true

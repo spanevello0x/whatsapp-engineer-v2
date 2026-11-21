@@ -1,0 +1,1 @@
+Leia `AGENTS.md`, `INICIAR.md` e `SKILL.md` para conduzir a instalação do WhatsApp Engineer V2 pela conversa, em português. Use o pacote completo e a entrada `scripts/onboard.py` no diretório estável indicado pelo instalador.
