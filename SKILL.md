@@ -17,7 +17,7 @@ Abra a conversa assim, ajustando ao que já for conhecido.
 >
 > Separe os celulares que vamos conectar. Vou mostrar um código QR para cada aparelho quando você estiver pronto.
 
-Rode `doctor` e `prepare`. Se faltarem Python 3.10+ ou Node.js com `node:sqlite` (22.13+), instale pelo gerenciador oficial disponível conforme a autorização e as permissões do ambiente. Descubra os caminhos executáveis. Uma falha técnica deve ser explicada com o próximo passo concreto.
+Descubra o executável Python 3.10+ disponível e rode `doctor`. Execute `prepare` quando as dependências ainda precisarem ser instaladas. Se faltarem Python 3.10+ ou Node.js com `node:sqlite` (22.13+), instale pelo gerenciador oficial disponível conforme a autorização e as permissões do ambiente. Em uma retomada, confira o status e aproveite a preparação existente. Uma falha técnica deve ser explicada com o próximo passo concreto.
 
 ## Cadastrar os telefones
 
